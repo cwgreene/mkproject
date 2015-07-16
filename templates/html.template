@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>{% if options.canvas %}
+<canvas width="1024" height="1280" id="canvas"></canvas>
+<script>
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('{{options.canvas}}');
+</script>{%endif%}
+</body>
+</html>

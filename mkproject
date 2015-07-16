@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+import sys
+import jinja2
+
+def template_directory():
+    return os.path.dirname(os.readlink(sys.argv[0])) + "/templates"
+
+def open_template(template):
+    return open(os.path.join(template_directory(), template))
+
+def generate_root(options):
+    try:
+        os.mkdir(options.name)
+    except OSError as e:
+        if e.errno == 17:
+            print "Project directory '%s' already exists" % options.name
+            sys.exit(1)
+
+def mkfile(options, name, content):
+    filepath = os.path.join(options.name, name)
+    with open(filepath, 'w') as output:
+        output.write(content)
+
+def generate_python(options):
+    generate_root(options)
+
+def generate_html(options):
+    generate_root(options)
+    with open_template("html.template") as template_file:
+        html_template = jinja2.Template(template_file.read())
+    rendered_html = html_template.render(options=options)
+    mkfile(options, "index.html", rendered_html)
+
+def main(args):
+    generate =  {"python" : generate_python,
+                 "html" : generate_html,
+                }
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(title="Project Type", dest="subparser", help="Project type. Use PROJECT_TYPE --help for more info")
+
+    parser_html = subparsers.add_parser("html", help="generate html project")
+    parser_html.add_argument("name")
+    parser_html.add_argument("--canvas", choices=["2d","webgl"])
+
+    parser_python = subparsers.add_parser("python", help="generate python project")
+    parser_python.add_argument("name")
+
+    options = parser.parse_args(args)
+
+    generate[options.subparser](options)
+    
+if __name__== "__main__":
+    main(sys.argv[1:])
