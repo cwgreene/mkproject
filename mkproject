@@ -5,8 +5,13 @@ import os
 import sys
 import jinja2
 
+def realpath(afile):
+    if os.path.islink(afile):
+        return os.readlink(afile)
+    return afile
+
 def template_directory():
-    return os.path.dirname(os.readlink(sys.argv[0])) + "/templates"
+    return os.path.dirname(realpath(sys.argv[0])) + "/templates"
 
 def open_template(template):
     return open(os.path.join(template_directory(), template))
